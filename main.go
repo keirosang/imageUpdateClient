@@ -68,6 +68,20 @@ func main() {
 	imagePath := os.Args[len(os.Args)-1]
 	// 判断传入的URL是否是网络图片
 	if imagePath[:4] == "http" {
+		// 获取当前程序所在目录路径
+		executablePath, err := os.Executable()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		// 判断当前目录下是否存在temp文件夹，不存在则创建
+		executableDir := filepath.Dir(executablePath)
+		tempDir := filepath.Join(executableDir, "temp")
+		if _, err := os.Stat(tempDir); os.IsNotExist(err) {
+			err := os.Mkdir(tempDir, os.ModePerm)
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+		}
 		// 获取当前时间戳并转为字符串
 		t := time.Now().Unix()
 		timestamp := strconv.FormatInt(t, 10)
@@ -92,8 +106,10 @@ func main() {
 		filename := path.Base(u.Path)
 		// 获取文件后缀
 		suffix := filepath.Ext(filename)
+		// 拼接temp路径
+
 		// 拼接保存路径图片名称加上时间戳，再将图片保存到本地
-		imagePath = filepath.Join("D:\\picgo\\temp", timestamp+"_temp"+suffix)
+		imagePath = filepath.Join(tempDir, timestamp+"_temp"+suffix)
 		err = ioutil.WriteFile(imagePath, imageData, 0644)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to save image: %v\n", err)
